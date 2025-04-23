@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,51 +11,116 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+
+import { URLS } from "@/constants";
+import AlertBox from "@/components/AlertBox";
+
+import { axiosInstance } from "@/lib/axios";
+import { setItem } from "@/lib/storage";
 
 export default function Login() {
+  const [payload, setPayload] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [msg, setMsg] = useState("");
+  const [err, setErr] = useState("");
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    try {
+      setErr("");
+      const { data } = await axiosInstance.post(`${URLS.USERS}/login`, payload);
+      const { access_token, refresh_token, data: msg } = data;
+      setMsg(msg);
+      setItem("access_token", access_token);
+      setItem("refresh_token", refresh_token);
+
+      // Send user to dashboard
+    } catch (e: any) {
+      const errMsg = e?.response?.data?.err || "Something went wrong";
+      setErr(errMsg);
+    } finally {
+      setPayload({
+        email: "",
+        password: "",
+      });
+      setTimeout(() => {
+        setMsg("");
+        setErr("");
+      }, 5000);
+    }
+  };
+
   return (
     <>
       <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
         <Card className="w-full max-w-md">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">Login</CardTitle>
-            <CardDescription className="text-center">
-              Enter your email and password to sign in to your account
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="m@example.com" required />
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                <Link to="/forgot-password" className="text-sm text-primary hover:underline">
-                  Forgot password?
+          <form onSubmit={(e) => handleSubmit(e)}>
+            <CardHeader className="space-y-1">
+              <CardTitle className="text-2xl font-bold text-center">Login</CardTitle>
+              <CardDescription className="text-center">
+                Enter your email and password to sign in to your account
+              </CardDescription>
+              <div className="m-2">
+                {err && <AlertBox variant="red" msg={err} />}
+                {msg && <AlertBox variant="teal" msg={msg} />}
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  type="email"
+                  placeholder="m@example.com"
+                  required
+                  value={payload?.email}
+                  onChange={(e) =>
+                    setPayload((prev) => {
+                      return {
+                        ...prev,
+                        email: e.target.value,
+                      };
+                    })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Password</Label>
+                  <Link to="/forgot-password" className="text-sm text-primary hover:underline">
+                    Forgot password?
+                  </Link>
+                </div>
+                <Input
+                  type="password"
+                  required
+                  autoComplete="on"
+                  value={payload?.password}
+                  onChange={(e) =>
+                    setPayload((prev) => {
+                      return {
+                        ...prev,
+                        password: e.target.value,
+                      };
+                    })
+                  }
+                />
+              </div>
+            </CardContent>
+            <CardFooter className="flex flex-col space-y-4">
+              <Button className="w-full" type="submit">
+                Sign in
+              </Button>
+              <div className="text-center text-sm">
+                Don't have an account?{" "}
+                <Link to="/auth/register" className="text-primary hover:underline">
+                  Sign up
                 </Link>
               </div>
-              <Input id="password" type="password" required />
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox id="remember" />
-              <Label htmlFor="remember" className="text-sm font-normal">
-                Remember me
-              </Label>
-            </div>
-          </CardContent>
-          <CardFooter className="flex flex-col space-y-4">
-            <Button className="w-full" type="submit">
-              Sign in
-            </Button>
-            <div className="text-center text-sm">
-              Don't have an account?{" "}
-              <Link href="/signup" className="text-primary hover:underline">
-                Sign up
-              </Link>
-            </div>
-          </CardFooter>
+            </CardFooter>
+          </form>
         </Card>
       </div>
     </>
