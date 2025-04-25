@@ -1,7 +1,5 @@
-"use client";
-
-import { useState } from "react";
-import { Link } from "react-router";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,64 +14,49 @@ import { Label } from "@/components/ui/label";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CheckCircle2, AlertCircle, Mail } from "lucide-react";
+import { axiosInstance } from "@/lib/axios";
+import { URLS } from "@/constants";
 
 export default function VerifyEmailPage() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isResending, setIsResending] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [otp, setOtp] = useState("");
+  const navigate = useNavigate();
+  const { state } = useLocation();
+  const [isSuccess, setIsSuccess] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
+  const [otp, setOtp] = useState<string>("");
 
-  // This would typically come from the URL query params or context
-  const userEmail = "user@example.com";
+  const userEmail = state?.email;
 
-  async function handleVerify(formData: FormData) {
-    setIsLoading(true);
-    setError(null);
-
+  const handleVerify = async (e: any) => {
+    e.preventDefault();
     try {
-      // In a real application, you would:
-      // 1. Send the OTP to your backend for verification
-      // 2. Update the user's email verification status in your database
-      // 3. Redirect to the appropriate page or show success message
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // For demo purposes, let's consider "123456" as the correct OTP
-      if (otp === "123456") {
+      const payload = {
+        email: userEmail,
+        otp,
+      };
+      const { data } = await axiosInstance.post(`${URLS.USERS}/email/verify`, payload);
+      if (data?.data) {
         setIsSuccess(true);
-      } else {
-        setError("Invalid verification code. Please try again.");
       }
-    } catch (err) {
-      setError("Failed to verify email. Please try again.");
+    } catch (e: any) {
+      setError(e?.response?.data?.err);
     } finally {
-      setIsLoading(false);
+      setTimeout(() => {
+        setOtp("");
+        setError("");
+        setIsSuccess(false);
+      }, 5000);
     }
-  }
+  };
 
   async function handleResendCode() {
-    setIsResending(true);
-    setError(null);
-
-    try {
-      // In a real application, you would:
-      // 1. Generate a new OTP
-      // 2. Send it to the user's email
-      // 3. Update the OTP in your database
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Show success message
-      setError("A new verification code has been sent to your email.");
-    } catch (err) {
-      setError("Failed to resend verification code. Please try again.");
-    } finally {
-      setIsResending(false);
-    }
+    setError("");
   }
+
+  useEffect(() => {
+    if (!state?.email) {
+      navigate("/auth/login");
+    }
+  }, [state, navigate]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
@@ -96,12 +79,12 @@ export default function VerifyEmailPage() {
             </Alert>
             <div className="text-center pt-2">
               <Button asChild className="w-full">
-                <Link to="/admin/dashboard">Continue to Dashboard</Link>
+                <Link to="/auth/login">Login to get started</Link>
               </Button>
             </div>
           </CardContent>
         ) : (
-          <form action={handleVerify}>
+          <form onSubmit={(e) => handleVerify(e)}>
             <CardContent className="space-y-4">
               {error && (
                 <Alert
@@ -149,18 +132,19 @@ export default function VerifyEmailPage() {
               </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
-              <Button className="w-full" type="submit" disabled={isLoading || otp.length !== 6}>
-                {isLoading ? "Verifying..." : "Verify Email"}
+              <Button className="w-full" type="submit" disabled={otp.length !== 6}>
+                {/* {isLoading ? "Verifying..." : "Verify Email"} */}
+                Verify Email
               </Button>
               <div className="text-center text-sm">
                 Didn't receive the code?{" "}
                 <button
                   type="button"
                   onClick={handleResendCode}
-                  disabled={isResending}
                   className="text-primary hover:underline disabled:opacity-70"
                 >
-                  {isResending ? "Sending..." : "Resend Code"}
+                  {/* {isResending ? "Sending..." : "Resend Code"} */}
+                  Resend Code
                 </button>
               </div>
             </CardFooter>

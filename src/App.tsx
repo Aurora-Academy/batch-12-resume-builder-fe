@@ -1,10 +1,11 @@
 import { Routes, Route } from "react-router";
-import Login from "@/pages/Login";
-import Register from "@/pages/Register";
+import Login from "@/pages/auth/Login";
+import Register from "@/pages/auth/Register";
 import Error from "@/pages/Error";
-import ForgotPasswordPage from "@/pages/ForgetPassword";
-import VerifyEmailPage from "@/pages/EmailVerification";
-import ForgetPasswordVerification from "@/pages/ForgetPasswordVerification";
+import ForgotPasswordPage from "@/pages/auth/ForgetPassword";
+import VerifyEmailPage from "@/pages/auth/EmailVerification";
+import ForgetPasswordVerification from "@/pages/auth/ForgetPasswordVerification";
+import Dashboard from "./pages/admin/Dashboard";
 
 export default function App() {
   return (
@@ -20,7 +21,10 @@ export default function App() {
           <Route path="fp-verification" element={<ForgetPasswordVerification />} />
         </Route>
         {/* Admin */}
-        <Route></Route>
+        <Route path="/admin">
+          <Route index element={<Dashboard />} />
+          <Route path="dashboard" element={<Dashboard />} />
+        </Route>
         <Route path="*" element={<Error />} />
       </Routes>
     </>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,16 +9,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { URLS } from "@/constants";
-import AlertBox from "@/components/AlertBox";
 
 import { axiosInstance } from "@/lib/axios";
 import { setItem } from "@/lib/storage";
 
 export default function Login() {
+  const navigate = useNavigate();
   const [payload, setPayload] = useState({
     email: "",
     password: "",
@@ -38,6 +39,7 @@ export default function Login() {
       setItem("refresh_token", refresh_token);
 
       // Send user to dashboard
+      navigate("/admin/dashboard");
     } catch (e: any) {
       const errMsg = e?.response?.data?.err || "Something went wrong";
       setErr(errMsg);
@@ -64,8 +66,16 @@ export default function Login() {
                 Enter your email and password to sign in to your account
               </CardDescription>
               <div className="m-2">
-                {err && <AlertBox variant="red" msg={err} />}
-                {msg && <AlertBox variant="teal" msg={msg} />}
+                {err && (
+                  <Alert variant="destructive" className="border-red-200 bg-red-50">
+                    <AlertDescription className="text-red-700">{err}</AlertDescription>
+                  </Alert>
+                )}
+                {msg && (
+                  <Alert className="border-green-200 bg-green-50">
+                    <AlertDescription className="text-teal-700">{msg}</AlertDescription>
+                  </Alert>
+                )}
               </div>
             </CardHeader>
             <CardContent className="space-y-4">

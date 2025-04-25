@@ -33,7 +33,7 @@ export default function ForgotPasswordPage() {
               Send OTP
             </Button>
             <div className="text-center text-sm">
-              Remember your password?{" "}
+              Remember your password?
               <Link to="/auth/login" className="text-primary hover:underline">
                 Back to login
               </Link>
