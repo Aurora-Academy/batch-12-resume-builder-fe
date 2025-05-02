@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Link } from "react-router";
+import { useEffect, useState, useTransition } from "react";
+import { Link, useLocation, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,62 +17,59 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CheckCircle2, AlertCircle, Eye, EyeOff } from "lucide-react";
 
+import { forgetPasswordVerification } from "@/services/auth";
+
 export default function ResetPasswordVerifyPage() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [otp, setOtp] = useState("");
+  const navigate = useNavigate();
+  const { state } = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [payload, setPayload] = useState({
+    email: state?.email || "",
+    token: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [status, setStatus] = useState({ msg: "", isSuccess: false, error: "" });
+  const [isPending, startTransition] = useTransition();
 
-  // This would typically come from the URL query params or context
-  const userEmail = "user@example.com";
-
-  async function handleSubmit(formData: FormData) {
-    setIsLoading(true);
-    setError(null);
-
-    // Get form data
-    const newPassword = formData.get("password") as string;
-    const confirmNewPassword = formData.get("confirmPassword") as string;
-
-    // Basic validation
-    if (newPassword !== confirmNewPassword) {
-      setError("Passwords do not match");
-      setIsLoading(false);
-      return;
-    }
-
-    if (otp.length !== 6) {
-      setError("Please enter the 6-digit verification code");
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      // In a real application, you would:
-      // 1. Verify the OTP code
-      // 2. Update the user's password in your database
-      // 3. Invalidate the OTP code
-      // 4. Redirect to login or show success message
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // For demo purposes, let's consider "123456" as the correct OTP
-      if (otp === "123456") {
-        setIsSuccess(true);
-      } else {
-        setError("Invalid verification code. Please try again.");
+  const handleSubmit = (e: any) => {
+    e.preventDefault();
+    startTransition(async () => {
+      try {
+        const { data } = await forgetPasswordVerification(payload);
+        setStatus((prev) => {
+          return { ...prev, isSuccess: true, msg: data?.data };
+        });
+      } catch (e: any) {
+        setStatus((prev) => {
+          return {
+            ...prev,
+            isSuccess: false,
+            error: e?.response?.data?.err || "Something went wrong",
+          };
+        });
+      } finally {
+        setTimeout(() => {
+          setPayload({
+            email,
+            token: "",
+            password: "",
+            confirmPassword: "",
+          });
+          setStatus((prev) => {
+            return { ...prev, msg: "", error: "" };
+          });
+        }, 4000);
       }
-    } catch (err) {
-      setError("Failed to reset password. Please try again.");
-    } finally {
-      setIsLoading(false);
+    });
+  };
+
+  useEffect(() => {
+    if (!state?.email) {
+      navigate("/auth/login");
     }
-  }
+  }, [navigate, state?.email]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
@@ -84,7 +81,7 @@ export default function ResetPasswordVerifyPage() {
           </CardDescription>
         </CardHeader>
 
-        {isSuccess ? (
+        {status?.isSuccess ? (
           <CardContent className="space-y-4">
             <Alert className="border-green-200 bg-green-50">
               <CheckCircle2 className="h-4 w-4 text-green-600" />
@@ -101,13 +98,13 @@ export default function ResetPasswordVerifyPage() {
             </div>
           </CardContent>
         ) : (
-          <form action={handleSubmit}>
+          <form onSubmit={(e) => handleSubmit(e)}>
             <CardContent className="space-y-4">
-              {error && (
+              {status?.error && (
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
                   <AlertTitle>Error</AlertTitle>
-                  <AlertDescription>{error}</AlertDescription>
+                  <AlertDescription>{status?.error}</AlertDescription>
                 </Alert>
               )}
 
@@ -116,7 +113,7 @@ export default function ResetPasswordVerifyPage() {
                 <Input
                   id="email"
                   type="email"
-                  value={userEmail}
+                  value={payload?.email}
                   disabled
                   className="bg-gray-100 text-gray-600"
                 />
@@ -125,7 +122,15 @@ export default function ResetPasswordVerifyPage() {
               <div className="space-y-2">
                 <Label htmlFor="otp">Verification Code</Label>
                 <div className="flex justify-center py-2">
-                  <InputOTP maxLength={6} value={otp} onChange={setOtp}>
+                  <InputOTP
+                    maxLength={6}
+                    value={payload?.token}
+                    onChange={(e: any) => {
+                      setPayload((prev) => {
+                        return { ...prev, token: e };
+                      });
+                    }}
+                  >
                     <InputOTPGroup>
                       <InputOTPSlot index={0} />
                       <InputOTPSlot index={1} />
@@ -148,8 +153,13 @@ export default function ResetPasswordVerifyPage() {
                     id="password"
                     name="password"
                     type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    value={payload?.password}
+                    autoComplete="on"
+                    onChange={(e: any) =>
+                      setPayload((prev) => {
+                        return { ...prev, password: e?.target?.value };
+                      })
+                    }
                     required
                   />
                   <Button
@@ -177,9 +187,14 @@ export default function ResetPasswordVerifyPage() {
                   <Input
                     id="confirmPassword"
                     name="confirmPassword"
+                    autoComplete="on"
                     type={showConfirmPassword ? "text" : "password"}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    value={payload?.confirmPassword}
+                    onChange={(e: any) =>
+                      setPayload((prev) => {
+                        return { ...prev, confirmPassword: e?.target?.value };
+                      })
+                    }
                     required
                   />
                   <Button
@@ -202,12 +217,8 @@ export default function ResetPasswordVerifyPage() {
               </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4 mt-4">
-              <Button
-                className="w-full"
-                type="submit"
-                disabled={isLoading || otp.length !== 6 || !password || !confirmPassword}
-              >
-                {isLoading ? "Resetting Password..." : "Reset Password"}
+              <Button className="w-full" type="submit" disabled={isPending}>
+                {isPending ? "Resetting Password..." : "Reset Password"}
               </Button>
               <div className="text-center text-sm">
                 Remember your password?{" "}

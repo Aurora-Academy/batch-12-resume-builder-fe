@@ -18,7 +18,7 @@ export default function App() {
           <Route path="register" element={<Register />} />
           <Route path="email-verification" element={<VerifyEmailPage />} />
           <Route path="forget-password" element={<ForgotPasswordPage />} />
-          <Route path="fp-verification" element={<ForgetPasswordVerification />} />
+          <Route path="forget-verification" element={<ForgetPasswordVerification />} />
         </Route>
         {/* Admin */}
         <Route path="/admin">
