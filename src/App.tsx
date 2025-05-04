@@ -6,6 +6,7 @@ import ForgotPasswordPage from "@/pages/auth/ForgetPassword";
 import VerifyEmailPage from "@/pages/auth/EmailVerification";
 import ForgetPasswordVerification from "@/pages/auth/ForgetPasswordVerification";
 import Dashboard from "./pages/admin/Dashboard";
+import Home from "./pages/Home";
 
 export default function App() {
   return (
@@ -24,6 +25,9 @@ export default function App() {
         <Route path="/admin">
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
+        </Route>
+        <Route path="/">
+          <Route index element={<Home />} />
         </Route>
         <Route path="*" element={<Error />} />
       </Routes>
