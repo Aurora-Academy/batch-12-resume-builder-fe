@@ -16,13 +16,12 @@ export const store = configureStore({
   reducer: {
     resume: persistResume,
   },
-  middleware: (getDefaultMiddleware) => {
+  middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoreActions: [FLUSH, REGISTER, REHYDRATE, PAUSE, PERSIST, PURGE],
+        ignoredActions: [FLUSH, REGISTER, REHYDRATE, PAUSE, PERSIST, PURGE],
       },
-    });
-  },
+    }),
   devTools: true,
 });
 
