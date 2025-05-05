@@ -16,9 +16,11 @@ import { Label } from "@/components/ui/label";
 import { URLS } from "@/constants";
 
 import { axiosInstance } from "@/lib/axios";
-import { setItem } from "@/lib/storage";
+
+import { useAuth } from "@/context/AuthContext";
 
 export default function Login() {
+  const { login } = useAuth();
   const navigate = useNavigate();
   const [payload, setPayload] = useState({
     email: "",
@@ -35,8 +37,7 @@ export default function Login() {
       const { data } = await axiosInstance.post(`${URLS.USERS}/login`, payload);
       const { access_token, refresh_token, data: msg } = data;
       setMsg(msg);
-      setItem("access_token", access_token);
-      setItem("refresh_token", refresh_token);
+      login(access_token, refresh_token);
 
       // Send user to dashboard
       navigate("/admin/dashboard");

@@ -10,6 +10,7 @@ import { store } from "./store";
 
 import "./index.css";
 import App from "./App.tsx";
+import { AuthProvider } from "@/context/AuthContext.tsx";
 
 const queryClient = new QueryClient();
 
@@ -19,7 +20,9 @@ createRoot(document.getElementById("root")!).render(
       <QueryClientProvider client={queryClient}>
         <Provider store={store}>
           <Suspense fallback={<div>App is loading...</div>}>
-            <App />
+            <AuthProvider>
+              <App />
+            </AuthProvider>
           </Suspense>
         </Provider>
         <ReactQueryDevtools initialIsOpen={false} />

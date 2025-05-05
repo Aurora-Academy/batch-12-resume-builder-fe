@@ -1,23 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
-import { axiosInstance } from "@/lib/axios";
-import { URLS } from "@/constants";
+import { useAdminQuery } from "@/hooks/useAdminQuery";
+import { useAuth } from "@/context/AuthContext";
 
 import TableSkeleton from "@/components/TableSkeleton";
 
-const fetchUsers = async () => {
-  const { data } = await axiosInstance.get(URLS.USERS, {
-    headers: {
-      access_token: localStorage.getItem("access_token"),
-    },
-  });
-  return data?.data;
-};
-
 const User = () => {
-  const { data, isLoading, isPending, error } = useQuery({
-    queryKey: ["users"],
-    queryFn: fetchUsers,
-  });
+  const { logout } = useAuth();
+  const { data, isLoading, isError } = useAdminQuery();
+
+  if (isError) return <div>Error fetching admin users list</div>;
   return (
     <div>
       <ul>
@@ -33,6 +23,9 @@ const User = () => {
           </>
         )}
       </ul>
+      <div>
+        <button onClick={logout}>Logout</button>
+      </div>
     </div>
   );
 };
