@@ -1,16 +1,16 @@
 import { Outlet } from "react-router";
-import { Suspense } from "react";
+import { AdminSidebar } from "./AdminNavbar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
-const AdminLayout = () => {
+export default function AdminLayout() {
   return (
-    <div>
-      Header
-      <Suspense fallback={<p>Loading page...</p>}>
-        <Outlet />
-      </Suspense>
-      Footer
-    </div>
+    <SidebarProvider>
+      <div className="flex min-h-screen min-w-full">
+        <AdminSidebar />
+        <main className="flex-1 overflow-y-auto my-15 mx-15">
+          <Outlet />
+        </main>
+      </div>
+    </SidebarProvider>
   );
-};
-
-export default AdminLayout;
+}

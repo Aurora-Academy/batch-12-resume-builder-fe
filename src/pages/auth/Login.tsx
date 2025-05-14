@@ -120,12 +120,12 @@ export default function Login() {
                 />
               </div>
             </CardContent>
-            <CardFooter className="flex flex-col space-y-4">
+            <CardFooter className="flex flex-col space-y-4 my-4">
               <Button className="w-full" type="submit">
                 Sign in
               </Button>
               <div className="text-center text-sm">
-                Don't have an account?{" "}
+                Don't have an account?&nbsp;
                 <Link to="/auth/register" className="text-primary hover:underline">
                   Sign up
                 </Link>

@@ -152,8 +152,8 @@ export default function RegisterPage() {
               Create Account
             </Button>
             <div className="text-center text-sm">
-              Already have an account?{" "}
-              <Link to="/login" className="text-primary hover:underline">
+              Already have an account?&nbsp;
+              <Link to="/auth/login" className="text-primary hover:underline">
                 Sign in
               </Link>
             </div>
