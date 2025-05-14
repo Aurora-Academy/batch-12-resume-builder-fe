@@ -51,14 +51,14 @@ export function AdminSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Admin</SidebarGroupLabel>
+          <SidebarGroupLabel>My Dashboard</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isActive("/admin")} tooltip="Dashboard">
                   <Link to="/admin">
                     <LayoutDashboard className="h-4 w-4" />
-                    <span>Dashboard</span>
+                    <span>Reports</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -70,6 +70,14 @@ export function AdminSidebar() {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Admin</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isActive("/admin/users")} tooltip="Users">
                   <Link to="/admin/users">
@@ -84,18 +92,6 @@ export function AdminSidebar() {
       </SidebarContent>
       <SidebarFooter className="p-4">
         <div className={cn("flex flex-col gap-4", state === "collapsed" && "items-center")}>
-          {/* App navigation button */}
-          <Button
-            variant="outline"
-            size="sm"
-            asChild
-            className={state === "collapsed" ? "w-8 h-8 p-0" : ""}
-          >
-            <Link to="/">
-              {state === "collapsed" ? <FileText className="h-4 w-4" /> : "Back to App"}
-            </Link>
-          </Button>
-
           {/* Separator */}
           <div className="h-px bg-border w-full" />
 
