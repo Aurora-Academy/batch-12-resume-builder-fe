@@ -44,7 +44,7 @@ export function AdminSidebar() {
               state === "collapsed" && "opacity-0 hidden"
             )}
           >
-            Resume Builder
+            ProResume
           </span>
           <SidebarTrigger className={cn("ml-auto", state === "collapsed" && "ml-0")} />
         </div>
