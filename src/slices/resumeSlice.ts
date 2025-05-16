@@ -25,3 +25,4 @@ export const { resetResume, removeExperience, addExperience, updateExperience } 
   resumeSlice.actions;
 
 export default resumeSlice.reducer;
+// export const resumeReducer = resumeSlice.reducer;

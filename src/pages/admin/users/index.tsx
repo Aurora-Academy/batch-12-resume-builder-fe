@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,6 +18,9 @@ import { DataTableColumnHeader } from "@/components/ui/data-table-column-header"
 import { DataTableRowActions } from "@/components/ui/data-table-row-actions";
 import { DataTableIntegrated } from "@/components/ui/data-table-integrated";
 import { toast } from "sonner";
+
+import { useDispatch, useSelector } from "react-redux";
+import { fetchUsers } from "@/slices/userSlice";
 
 // Sample user data
 const users = [
@@ -134,6 +137,8 @@ const users = [
 type User = (typeof users)[0];
 
 export default function AdminUsers() {
+  const dispatch = useDispatch();
+  const { users, limit, currentPage } = useSelector((state: any) => state.users);
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
 
   const handleViewUser = (user: User) => {
@@ -247,6 +252,16 @@ export default function AdminUsers() {
       description: "The new user has been added to the system",
     });
   };
+
+  console.log({ users });
+
+  const initUserFetch = useCallback(() => {
+    dispatch(fetchUsers({ limit, page: currentPage }));
+  }, [dispatch, limit, currentPage]);
+
+  useEffect(() => {
+    initUserFetch();
+  }, [initUserFetch]);
 
   return (
     <div className="p-6 space-y-6">

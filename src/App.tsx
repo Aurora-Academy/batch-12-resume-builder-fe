@@ -41,7 +41,7 @@ export default function App() {
         </Route>
         <Route path="*" element={<Error />} />
       </Routes>
-      <Toaster richColors closeButton position="top-right" />
+      <Toaster richColors closeButton position="bottom-right" />
     </>
   );
 }
