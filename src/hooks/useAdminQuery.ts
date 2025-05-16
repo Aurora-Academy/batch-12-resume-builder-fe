@@ -1,6 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
 import { createAxiosAdmin } from "@/lib/axiosAdmin";
-import { URLS } from "@/constants";
 
 import { useAuth } from "@/context/AuthContext";
 import { useMemo } from "react";
@@ -16,12 +14,5 @@ export const useAdminQuery = () => {
     [auth?.accessToken, auth?.refreshToken, auth?.logout]
   );
 
-  const fetchUsers = async () => {
-    const { data } = await axiosAdmin.get(URLS.USERS);
-    return data.data;
-  };
-  return useQuery({
-    queryKey: ["users"],
-    queryFn: fetchUsers,
-  });
+  return axiosAdmin;
 };

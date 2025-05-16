@@ -22,119 +22,20 @@ import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUsers } from "@/slices/userSlice";
 
-// Sample user data
-const users = [
-  {
-    id: "1",
-    name: "John Doe",
-    email: "john.doe@example.com",
-    role: "User",
-    status: "Active",
-    createdAt: "2023-05-15",
-    resumeCount: 3,
-  },
-  {
-    id: "2",
-    name: "Sarah Smith",
-    email: "sarah.smith@example.com",
-    role: "User",
-    status: "Active",
-    createdAt: "2023-06-22",
-    resumeCount: 1,
-  },
-  {
-    id: "3",
-    name: "Michael Johnson",
-    email: "michael.johnson@example.com",
-    role: "Admin",
-    status: "Active",
-    createdAt: "2023-04-10",
-    resumeCount: 5,
-  },
-  {
-    id: "4",
-    name: "Emily Brown",
-    email: "emily.brown@example.com",
-    role: "User",
-    status: "Inactive",
-    createdAt: "2023-07-05",
-    resumeCount: 0,
-  },
-  {
-    id: "5",
-    name: "David Wilson",
-    email: "david.wilson@example.com",
-    role: "User",
-    status: "Active",
-    createdAt: "2023-08-18",
-    resumeCount: 2,
-  },
-  {
-    id: "6",
-    name: "Jennifer Lee",
-    email: "jennifer.lee@example.com",
-    role: "User",
-    status: "Active",
-    createdAt: "2023-09-01",
-    resumeCount: 4,
-  },
-  {
-    id: "7",
-    name: "Robert Garcia",
-    email: "robert.garcia@example.com",
-    role: "User",
-    status: "Inactive",
-    createdAt: "2023-07-12",
-    resumeCount: 1,
-  },
-  {
-    id: "8",
-    name: "Lisa Martinez",
-    email: "lisa.martinez@example.com",
-    role: "Admin",
-    status: "Active",
-    createdAt: "2023-05-20",
-    resumeCount: 7,
-  },
-  {
-    id: "9",
-    name: "James Taylor",
-    email: "james.taylor@example.com",
-    role: "User",
-    status: "Active",
-    createdAt: "2023-08-05",
-    resumeCount: 2,
-  },
-  {
-    id: "10",
-    name: "Patricia Anderson",
-    email: "patricia.anderson@example.com",
-    role: "User",
-    status: "Active",
-    createdAt: "2023-06-15",
-    resumeCount: 3,
-  },
-  {
-    id: "11",
-    name: "Thomas White",
-    email: "thomas.white@example.com",
-    role: "User",
-    status: "Inactive",
-    createdAt: "2023-09-10",
-    resumeCount: 0,
-  },
-  {
-    id: "12",
-    name: "Jessica Harris",
-    email: "jessica.harris@example.com",
-    role: "User",
-    status: "Active",
-    createdAt: "2023-07-25",
-    resumeCount: 2,
-  },
-];
+import { formatDate } from "@/lib/dateFormatter";
 
-type User = (typeof users)[0];
+// type User = (typeof users)[0];
+type User = {
+  _id: string;
+  name: string;
+  email: string;
+  isBlocked: boolean;
+  isEmailVerified: boolean;
+  roles: [string];
+  createdAt: string;
+  updatedAt: string;
+  __v?: number;
+};
 
 export default function AdminUsers() {
   const dispatch = useDispatch();
@@ -155,11 +56,19 @@ export default function AdminUsers() {
     });
   };
 
-  const handleDeleteUser = (user: User) => {
-    toast.error(`${user.name} has been deleted`, {
-      description: "User has been permanently removed",
-      icon: <Trash2 className="h-4 w-4" />,
-    });
+  const handleBlockUser = (user: User) => {
+    const status = user?.isBlocked ? "unblocked" : "blocked";
+    if (status === "blocked") {
+      toast.error(`${user.name} has been ${status}`, {
+        description: `User has been ${status}`,
+        icon: <Trash2 className="h-4 w-4" />,
+      });
+    } else {
+      toast.success(`${user.name} has been ${status}`, {
+        description: `User has been ${status}`,
+        icon: <Trash2 className="h-4 w-4" />,
+      });
+    }
   };
 
   const columns: ColumnDef<User>[] = [
@@ -196,27 +105,36 @@ export default function AdminUsers() {
       cell: ({ row }) => <div>{row.getValue("email")}</div>,
     },
     {
-      accessorKey: "role",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Role" />,
-      cell: ({ row }) => <div>{row.getValue("role")}</div>,
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Roles" />,
+      accessorKey: "roles",
+      cell: ({ row }) => {
+        const roles: any = row.getValue("roles");
+        return <div>{roles.toString()}</div>;
+      },
     },
     {
-      accessorKey: "status",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+      accessorKey: "isBlocked",
+      header: ({ column }) => <DataTableColumnHeader column={column} title="is blocked?" />,
       cell: ({ row }) => {
-        const status = row.getValue("status") as string;
-        return <Badge variant={status === "Active" ? "default" : "secondary"}>{status}</Badge>;
+        const status = row.getValue("isBlocked");
+        return <Badge variant={status ? "destructive" : "default"}>{status ? "Yes" : "No"}</Badge>;
+      },
+    },
+    {
+      accessorKey: "isEmailVerified",
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Email Status" />,
+      cell: ({ row }) => {
+        const status = row.getValue("isEmailVerified");
+        return <Badge variant={status ? "default" : "destructive"}>{status ? "Yes" : "No"}</Badge>;
       },
     },
     {
       accessorKey: "createdAt",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Created" />,
-      cell: ({ row }) => <div>{row.getValue("createdAt")}</div>,
-    },
-    {
-      accessorKey: "resumeCount",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Resumes" />,
-      cell: ({ row }) => <div>{row.getValue("resumeCount")}</div>,
+      cell: ({ row }) => {
+        const date = formatDate(row.getValue("createdAt"));
+        return <div>{date}</div>;
+      },
     },
     {
       id: "actions",
@@ -235,8 +153,8 @@ export default function AdminUsers() {
               icon: <Pencil className="h-4 w-4" />,
             },
             {
-              label: "Delete user",
-              onClick: handleDeleteUser,
+              label: "Block user",
+              onClick: handleBlockUser,
               icon: <Trash2 className="h-4 w-4" />,
               className: "text-destructive",
             },
@@ -252,8 +170,6 @@ export default function AdminUsers() {
       description: "The new user has been added to the system",
     });
   };
-
-  console.log({ users });
 
   const initUserFetch = useCallback(() => {
     dispatch(fetchUsers({ limit, page: currentPage }));
@@ -279,7 +195,7 @@ export default function AdminUsers() {
         searchPlaceholder="Search users..."
       />
 
-      <Dialog open={isAddUserOpen} onOpenChange={setIsAddUserOpen}>
+      {/* <Dialog open={isAddUserOpen} onOpenChange={setIsAddUserOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Add New User</DialogTitle>
@@ -313,7 +229,7 @@ export default function AdminUsers() {
             </Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
     </div>
   );
 }

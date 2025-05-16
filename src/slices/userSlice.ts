@@ -1,12 +1,12 @@
-import { URLS } from "@/constants";
-import { axiosInstance } from "@/lib/axios";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createAxiosAdminFn } from "@/lib/axiosAdmin";
+import { URLS } from "@/constants";
 
 const initialState = {
   users: [],
   total: 0,
   currentPage: 1,
-  limit: 10,
+  limit: 5,
   error: "",
   loading: false,
 };
@@ -15,12 +15,9 @@ export const fetchUsers = createAsyncThunk(
   "users/fetchUsers",
   async ({ limit, page }: { limit: any; page: any }, { rejectWithValue }) => {
     try {
-      const res = await axiosInstance.get(`${URLS.USERS}?limit=${limit}&page=${page}`, {
-        headers: {
-          access_token: localStorage.getItem("access_token"),
-        },
-      });
-      return res.data;
+      const axiosAdmin = () => createAxiosAdminFn();
+      const { data } = await axiosAdmin().get(`${URLS.USERS}?limit=${limit}&page=${page}`);
+      return data;
     } catch (e: any) {
       return rejectWithValue({
         data: e?.response?.data?.msg ?? "Something went wrong",
