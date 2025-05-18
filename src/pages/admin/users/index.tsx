@@ -1,22 +1,14 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
+import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Eye, Pencil, Trash2 } from "lucide-react";
+import { Plus, Eye, Pencil, Trash2, Download } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
 import { DataTableRowActions } from "@/components/ui/data-table-row-actions";
 import { DataTableIntegrated } from "@/components/ui/data-table-integrated";
+import { ButtonGroup } from "@/components/button-group";
 import { toast } from "sonner";
 
 import { useDispatch, useSelector } from "react-redux";
@@ -40,7 +32,6 @@ type User = {
 export default function AdminUsers() {
   const dispatch = useDispatch();
   const { users, limit, currentPage } = useSelector((state: any) => state.users);
-  const [isAddUserOpen, setIsAddUserOpen] = useState(false);
 
   const handleViewUser = (user: User) => {
     toast(`Viewing ${user.name}'s profile`, {
@@ -164,13 +155,6 @@ export default function AdminUsers() {
     },
   ];
 
-  const handleAddUser = () => {
-    setIsAddUserOpen(false);
-    toast.success("User created successfully", {
-      description: "The new user has been added to the system",
-    });
-  };
-
   const initUserFetch = useCallback(() => {
     dispatch(fetchUsers({ limit, page: currentPage }));
   }, [dispatch, limit, currentPage]);
@@ -183,9 +167,22 @@ export default function AdminUsers() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Users</h1>
-        <Button onClick={() => setIsAddUserOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Add User
-        </Button>
+
+        <ButtonGroup className="gap-2">
+          <Button
+            variant="destructive"
+            onClick={() => {
+              console.log("here");
+            }}
+          >
+            <Download className="mr-2 h-4 w-4" /> Export to XLSX
+          </Button>
+          <Button asChild>
+            <Link to="/admin/users/add">
+              <Plus className="mr-2 h-4 w-4" /> Add User
+            </Link>
+          </Button>
+        </ButtonGroup>
       </div>
 
       <DataTableIntegrated
