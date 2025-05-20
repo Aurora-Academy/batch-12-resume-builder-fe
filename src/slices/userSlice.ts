@@ -6,7 +6,7 @@ const initialState = {
   users: [],
   total: 0,
   currentPage: 1,
-  limit: 5,
+  limit: 10,
   error: "",
   loading: false,
 };
@@ -43,10 +43,12 @@ const userSlice = createSlice({
       .addCase(fetchUsers.fulfilled, (state, action) => {
         state.loading = false;
         state.users = action.payload.data;
+        state.total = action.payload.total;
       })
       .addCase(fetchUsers.rejected, (state, action: any) => {
         state.loading = false;
         state.error = action.payload.data;
+        state.total = 0;
       })
       .addCase(fetchUsers.pending, (state) => {
         state.loading = true;

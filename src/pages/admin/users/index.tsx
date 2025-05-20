@@ -12,7 +12,8 @@ import { ButtonGroup } from "@/components/button-group";
 import { toast } from "sonner";
 
 import { useDispatch, useSelector } from "react-redux";
-import { fetchUsers } from "@/slices/userSlice";
+import type { AppDispatch } from "@/store";
+import { fetchUsers, setCurrentPage, setLimit } from "@/slices/userSlice";
 
 import { formatDate } from "@/lib/dateFormatter";
 
@@ -28,10 +29,9 @@ type User = {
   updatedAt: string;
   __v?: number;
 };
-
 export default function AdminUsers() {
-  const dispatch = useDispatch();
-  const { users, limit, currentPage } = useSelector((state: any) => state.users);
+  const dispatch = useDispatch<AppDispatch>();
+  const { users, limit, currentPage, total } = useSelector((state: any) => state.users);
 
   const handleViewUser = (user: User) => {
     toast(`Viewing ${user.name}'s profile`, {
@@ -155,6 +155,14 @@ export default function AdminUsers() {
     },
   ];
 
+  const changePage = (value: number) => {
+    dispatch(setCurrentPage(value));
+  };
+
+  const changeLimit = (value: any) => {
+    dispatch(setLimit(value));
+  };
+
   const initUserFetch = useCallback(() => {
     dispatch(fetchUsers({ limit, page: currentPage }));
   }, [dispatch, limit, currentPage]);
@@ -188,45 +196,14 @@ export default function AdminUsers() {
       <DataTableIntegrated
         columns={columns}
         data={users}
+        setLimit={changeLimit}
+        setCurrentPage={changePage}
+        limit={limit}
+        page={currentPage}
+        total={total}
         filterColumn="name"
         searchPlaceholder="Search users..."
       />
-
-      {/* <Dialog open={isAddUserOpen} onOpenChange={setIsAddUserOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Add New User</DialogTitle>
-            <DialogDescription>
-              Create a new user account. Click save when you're done.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">
-                Name
-              </Label>
-              <Input id="name" className="col-span-3" />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="email" className="text-right">
-                Email
-              </Label>
-              <Input id="email" type="email" className="col-span-3" />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="password" className="text-right">
-                Password
-              </Label>
-              <Input id="password" type="password" className="col-span-3" />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button type="submit" onClick={handleAddUser}>
-              Save User
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog> */}
     </div>
   );
 }
