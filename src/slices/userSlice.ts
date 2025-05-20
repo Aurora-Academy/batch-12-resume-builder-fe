@@ -9,6 +9,7 @@ const initialState = {
   limit: 10,
   error: "",
   loading: false,
+  reports: [],
 };
 
 export const fetchUsers = createAsyncThunk(
@@ -27,7 +28,22 @@ export const fetchUsers = createAsyncThunk(
       return data;
     } catch (e: any) {
       return rejectWithValue({
-        data: e?.response?.data?.msg ?? "Something went wrong",
+        data: e?.response?.data?.err ?? "Something went wrong",
+      });
+    }
+  }
+);
+
+export const makeUserDownloadable = createAsyncThunk(
+  "users/makeUserDownloadable",
+  async (payload, { rejectWithValue }) => {
+    try {
+      const axiosAdmin = () => createAxiosAdminFn();
+      const { data } = await axiosAdmin().get(`${URLS.USERS}/report`);
+      return data;
+    } catch (e: any) {
+      return rejectWithValue({
+        data: e?.response?.data?.err ?? "Something went wrong",
       });
     }
   }
@@ -59,6 +75,19 @@ const userSlice = createSlice({
       })
       .addCase(fetchUsers.pending, (state) => {
         state.loading = true;
+        state.error = "";
+      })
+      .addCase(makeUserDownloadable.fulfilled, (state, action) => {
+        state.loading = false;
+        state.reports = action.payload;
+      })
+      .addCase(makeUserDownloadable.rejected, (state, action: any) => {
+        state.loading = false;
+        state.error = action.payload.data;
+      })
+      .addCase(makeUserDownloadable.pending, (state) => {
+        state.loading = true;
+        state.reports = [];
         state.error = "";
       });
   },

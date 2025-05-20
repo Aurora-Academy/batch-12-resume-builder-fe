@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Eye, Pencil, Trash2, Download } from "lucide-react";
+import { Plus, Eye, Pencil, Trash2, Download, FileWarningIcon } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
@@ -13,10 +13,13 @@ import { toast } from "sonner";
 
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch } from "@/store";
-import { fetchUsers, setCurrentPage, setLimit } from "@/slices/userSlice";
+import { fetchUsers, makeUserDownloadable, setCurrentPage, setLimit } from "@/slices/userSlice";
 
 import { formatDate } from "@/lib/dateFormatter";
 import { useDebounce } from "@/hooks/useDebounce";
+
+import { jsPDF } from "jspdf";
+import { autoTable } from "jspdf-autotable";
 
 // type User = (typeof users)[0];
 type User = {
@@ -62,6 +65,51 @@ export default function AdminUsers() {
       toast.success(`${user.name} has been ${status}`, {
         description: `User has been ${status}`,
         icon: <Trash2 className="h-4 w-4" />,
+      });
+    }
+  };
+
+  const handleDownload = async () => {
+    const resultActions = await dispatch(makeUserDownloadable());
+    const reports = resultActions.payload;
+    if (reports.length > 0) {
+      toast.success(`Report generated successfully`, {
+        description: `User list is ready for download`,
+        icon: <Eye className="h-4 w-4" />,
+      });
+      const doc = new jsPDF();
+      doc.text("User Data Report", 14, 15);
+      try {
+        autoTable(doc, {
+          startY: 20,
+          head: [["ID", "Name", "Email", "Roles", "Created At"]],
+          styles: {
+            fontSize: 9,
+          },
+          body: reports.map((user: any) => [
+            user?._id,
+            user?.name,
+            user?.email,
+            Array.isArray(user?.roles) ? user?.roles.toString() : user?.roles,
+            new Date(user?.createdAt).toLocaleDateString(),
+          ]),
+          headStyles: {
+            fillColor: "#3A3A99",
+            textColor: "#fff",
+            halign: "center",
+          },
+          bodyStyles: {
+            halign: "left",
+          },
+        });
+      } catch (e) {
+        console.log({ e });
+      }
+      doc.save("user-data.pdf");
+    } else {
+      toast.error(`Report generation failed`, {
+        description: `No Users found`,
+        icon: <FileWarningIcon className="h-4 w-4" />,
       });
     }
   };
@@ -181,13 +229,8 @@ export default function AdminUsers() {
         <h1 className="text-3xl font-bold tracking-tight">Users</h1>
 
         <ButtonGroup className="gap-2">
-          <Button
-            variant="destructive"
-            onClick={() => {
-              console.log("here");
-            }}
-          >
-            <Download className="mr-2 h-4 w-4" /> Export to XLSX
+          <Button variant="destructive" onClick={handleDownload}>
+            <Download className="mr-2 h-4 w-4" /> Export to PDF
           </Button>
           <Button asChild>
             <Link to="/admin/users/add">
