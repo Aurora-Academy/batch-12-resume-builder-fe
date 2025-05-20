@@ -13,10 +13,17 @@ const initialState = {
 
 export const fetchUsers = createAsyncThunk(
   "users/fetchUsers",
-  async ({ limit, page }: { limit: any; page: any }, { rejectWithValue }) => {
+  async (
+    { limit, page, search }: { limit: number; page: number; search?: string },
+    { rejectWithValue }
+  ) => {
     try {
+      let url = `${URLS.USERS}?limit=${limit}&page=${page}&name=`;
+      if (search) {
+        url += encodeURIComponent(`${search}`);
+      }
       const axiosAdmin = () => createAxiosAdminFn();
-      const { data } = await axiosAdmin().get(`${URLS.USERS}?limit=${limit}&page=${page}`);
+      const { data } = await axiosAdmin().get(url);
       return data;
     } catch (e: any) {
       return rejectWithValue({

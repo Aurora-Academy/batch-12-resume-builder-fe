@@ -7,12 +7,15 @@ interface DataTableToolbarProps<TData> {
   table: Table<TData>;
   filterColumn?: string;
   searchPlaceholder?: string;
+  search?: string;
+  setSearch?: any;
 }
 
 export function DataTableToolbar<TData>({
   table,
-  filterColumn = "name",
   searchPlaceholder = "Search...",
+  search,
+  setSearch,
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
 
@@ -23,8 +26,8 @@ export function DataTableToolbar<TData>({
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder={searchPlaceholder}
-            value={(table.getColumn(filterColumn)?.getFilterValue() as string) ?? ""}
-            onChange={(event) => table.getColumn(filterColumn)?.setFilterValue(event.target.value)}
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
             className="pl-8"
           />
           {isFiltered && (

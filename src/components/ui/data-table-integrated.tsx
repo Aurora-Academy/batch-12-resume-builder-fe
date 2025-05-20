@@ -28,6 +28,8 @@ interface DataTableIntegratedProps<TData, TValue> {
   total: number;
   filterColumn?: string;
   searchPlaceholder?: string;
+  search?: string;
+  setSearch?: any;
 }
 
 export function DataTableIntegrated<TData, TValue>({
@@ -40,6 +42,8 @@ export function DataTableIntegrated<TData, TValue>({
   total,
   filterColumn = "name",
   searchPlaceholder = "Search...",
+  search,
+  setSearch,
 }: DataTableIntegratedProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
@@ -80,6 +84,8 @@ export function DataTableIntegrated<TData, TValue>({
         table={table}
         filterColumn={filterColumn}
         searchPlaceholder={searchPlaceholder}
+        search={search}
+        setSearch={setSearch}
       />
       <div className="rounded-md border">
         <Table>

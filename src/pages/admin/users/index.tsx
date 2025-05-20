@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +16,7 @@ import type { AppDispatch } from "@/store";
 import { fetchUsers, setCurrentPage, setLimit } from "@/slices/userSlice";
 
 import { formatDate } from "@/lib/dateFormatter";
+import { useDebounce } from "@/hooks/useDebounce";
 
 // type User = (typeof users)[0];
 type User = {
@@ -32,6 +33,9 @@ type User = {
 export default function AdminUsers() {
   const dispatch = useDispatch<AppDispatch>();
   const { users, limit, currentPage, total } = useSelector((state: any) => state.users);
+  const [search, setSearch] = useState<string>("");
+
+  const debouncedSearchTerm = useDebounce(search, 1500);
 
   const handleViewUser = (user: User) => {
     toast(`Viewing ${user.name}'s profile`, {
@@ -164,8 +168,8 @@ export default function AdminUsers() {
   };
 
   const initUserFetch = useCallback(() => {
-    dispatch(fetchUsers({ limit, page: currentPage }));
-  }, [dispatch, limit, currentPage]);
+    dispatch(fetchUsers({ limit, page: currentPage, search: debouncedSearchTerm }));
+  }, [dispatch, limit, currentPage, debouncedSearchTerm]);
 
   useEffect(() => {
     initUserFetch();
@@ -203,6 +207,8 @@ export default function AdminUsers() {
         total={total}
         filterColumn="name"
         searchPlaceholder="Search users..."
+        search={search}
+        setSearch={setSearch}
       />
     </div>
   );
