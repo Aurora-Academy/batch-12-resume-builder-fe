@@ -12,6 +12,18 @@ const initialState = {
   reports: [],
 };
 
+interface UserProfile {
+  _id: string;
+  name: string;
+  email: string;
+  isBlocked: boolean;
+  isEmailVerified: boolean;
+  roles: [string];
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
 export const fetchUsers = createAsyncThunk(
   "users/fetchUsers",
   async (
@@ -36,10 +48,25 @@ export const fetchUsers = createAsyncThunk(
 
 export const makeUserDownloadable = createAsyncThunk(
   "users/makeUserDownloadable",
-  async (payload, { rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
       const axiosAdmin = () => createAxiosAdminFn();
       const { data } = await axiosAdmin().get(`${URLS.USERS}/report`);
+      return data;
+    } catch (e: any) {
+      return rejectWithValue({
+        data: e?.response?.data?.err ?? "Something went wrong",
+      });
+    }
+  }
+);
+
+export const blockUser = createAsyncThunk(
+  "users/blockUser",
+  async ({ id, status }: { id: string; status: string }, { rejectWithValue }) => {
+    try {
+      const axiosAdmin = () => createAxiosAdminFn();
+      const { data } = await axiosAdmin().patch(`${URLS.USERS}/${id}/block`);
       return data;
     } catch (e: any) {
       return rejectWithValue({
@@ -88,6 +115,19 @@ const userSlice = createSlice({
       .addCase(makeUserDownloadable.pending, (state) => {
         state.loading = true;
         state.reports = [];
+        state.error = "";
+      })
+      .addCase(blockUser.fulfilled, (state, action) => {
+        state.loading = false;
+        const existing = state.users.find((user: any) => user?._id === action.meta.arg.id);
+        existing.isBlocked = action.meta.arg.status === "blocked" ? true : false;
+      })
+      .addCase(blockUser.rejected, (state, action: any) => {
+        state.loading = false;
+        state.error = action.payload.data;
+      })
+      .addCase(blockUser.pending, (state) => {
+        state.loading = true;
         state.error = "";
       });
   },

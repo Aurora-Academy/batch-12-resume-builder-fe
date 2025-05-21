@@ -13,7 +13,13 @@ import { toast } from "sonner";
 
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch } from "@/store";
-import { fetchUsers, makeUserDownloadable, setCurrentPage, setLimit } from "@/slices/userSlice";
+import {
+  fetchUsers,
+  makeUserDownloadable,
+  blockUser,
+  setCurrentPage,
+  setLimit,
+} from "@/slices/userSlice";
 
 import { formatDate } from "@/lib/dateFormatter";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -56,6 +62,7 @@ export default function AdminUsers() {
 
   const handleBlockUser = (user: User) => {
     const status = user?.isBlocked ? "unblocked" : "blocked";
+    dispatch(blockUser({ id: user?._id, status }));
     if (status === "blocked") {
       toast.error(`${user.name} has been ${status}`, {
         description: `User has been ${status}`,
