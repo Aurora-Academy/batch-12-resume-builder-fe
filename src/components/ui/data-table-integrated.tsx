@@ -64,6 +64,12 @@ export function DataTableIntegrated<TData, TValue>({
         pageSize: limit,
       },
     },
+    onPaginationChange: (updater) => {
+      if (typeof updater !== "function") return;
+      const newPageInfo = updater(table.getState().pagination);
+      setLimit(newPageInfo?.pageSize);
+      setCurrentPage(newPageInfo?.pageIndex + 1);
+    },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
@@ -125,7 +131,7 @@ export function DataTableIntegrated<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination table={table} setCurrentPage={setCurrentPage} setLimit={setLimit} />
+      <DataTablePagination table={table} />
     </div>
   );
 }
