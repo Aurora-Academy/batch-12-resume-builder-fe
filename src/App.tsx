@@ -14,6 +14,7 @@ import User from "./pages/admin/users";
 import AdminLayout from "./layout/AdminLayout";
 import { AdminResumes } from "./pages/admin/resumes";
 import { Toaster } from "sonner";
+import PrivateRoute from "./components/PrivateRoute";
 
 export default function App() {
   return (
@@ -30,11 +31,46 @@ export default function App() {
         </Route>
         {/* Admin */}
         <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="resumes" element={<AdminResumes />} />
-          <Route path="resumes/add" element={<AddResume />} />
-          <Route path="users" element={<User />} />
+          <Route
+            index
+            element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="dashboard"
+            element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="resumes"
+            element={
+              <PrivateRoute>
+                <AdminResumes />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="resumes/add"
+            element={
+              <PrivateRoute>
+                <AddResume />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="users"
+            element={
+              <PrivateRoute adminOnly>
+                <User />
+              </PrivateRoute>
+            }
+          />
         </Route>
         <Route path="/" element={<UserLayout />}>
           <Route index element={<Home />} />

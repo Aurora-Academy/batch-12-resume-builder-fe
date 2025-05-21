@@ -25,13 +25,35 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+import { useAuth } from "@/context/AuthContext";
+import { getInitials } from "@/lib/utils";
+
 export function AdminSidebar() {
   const location = useLocation();
   const { state } = useSidebar();
-
+  const { user, logout } = useAuth();
   const isActive = (path: string) => {
     return location.pathname === path;
   };
+
+  const generalNavs = [
+    {
+      label: "Reports",
+      url: "/admin",
+      isAdminOnly: false,
+      icon: <LayoutDashboard className="h-4 w-4" />,
+    },
+    {
+      label: "Resumes",
+      url: "/admin/resumes",
+      isAdminOnly: false,
+      icon: <FileText className="h-4 w-4" />,
+    },
+  ];
+  const adminNavs = [
+    { label: "Users", url: "/admin/users", isAdminOnly: true, icon: <Users className="h-4 w-4" /> },
+  ];
 
   return (
     <Sidebar collapsible="icon">
@@ -54,41 +76,46 @@ export function AdminSidebar() {
           <SidebarGroupLabel>My Dashboard</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/admin")} tooltip="Dashboard">
-                  <Link to="/admin">
-                    <LayoutDashboard className="h-4 w-4" />
-                    <span>Reports</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/admin/resumes")} tooltip="Resumes">
-                  <Link to="/admin/resumes">
-                    <FileText className="h-4 w-4" />
-                    <span>Resumes</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              {generalNavs.map((link, idx) => {
+                return (
+                  <SidebarMenuItem key={idx}>
+                    <SidebarMenuButton asChild isActive={isActive(link?.url)} tooltip={link?.label}>
+                      <Link to={link?.url}>
+                        {link?.icon}
+                        <span>{link?.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>Admin</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/admin/users")} tooltip="Users">
-                  <Link to="/admin/users">
-                    <Users className="h-4 w-4" />
-                    <span>Users</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {user?.roles.includes("admin") && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Admin</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {adminNavs.map((link, idx) => {
+                  return (
+                    <SidebarMenuItem key={idx}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isActive(link?.url)}
+                        tooltip={link?.label}
+                      >
+                        <Link to={link?.url}>
+                          <LayoutDashboard className="h-4 w-4" />
+                          <span>{link?.label}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
       <SidebarFooter className="p-4">
         <div className={cn("flex flex-col gap-4", state === "collapsed" && "items-center")}>
@@ -104,17 +131,17 @@ export function AdminSidebar() {
                     className={cn("h-9 w-9 cursor-pointer", state === "collapsed" ? "mx-auto" : "")}
                   >
                     <AvatarImage src="/diverse-avatars.png" alt="User avatar" />
-                    <AvatarFallback>AD</AvatarFallback>
+                    <AvatarFallback>{getInitials(user?.name)}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <div className="flex flex-col space-y-1 p-2">
-                  <p className="text-sm font-medium">Admin User</p>
-                  <p className="text-xs text-muted-foreground">admin@example.com</p>
+                  <p className="text-sm font-medium">{user?.name || "User"}</p>
+                  <p className="text-xs text-muted-foreground">{user?.email}</p>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-red-600">
+                <DropdownMenuItem className="text-red-600" onClick={logout}>
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
                 </DropdownMenuItem>
@@ -123,8 +150,8 @@ export function AdminSidebar() {
 
             {state !== "collapsed" && (
               <div className="flex flex-col">
-                <span className="text-sm font-medium">Admin User</span>
-                <span className="text-xs text-muted-foreground">admin@example.com</span>
+                <span className="text-sm font-medium">{user?.name || "User"}</span>
+                <span className="text-xs text-muted-foreground">{user?.email}</span>
               </div>
             )}
           </div>
