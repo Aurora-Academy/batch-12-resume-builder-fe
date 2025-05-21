@@ -1,5 +1,19 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { useNavigate } from "react-router";
+import { URLS } from "@/constants";
+import { createAxiosAdminFn } from "@/lib/axiosAdmin";
+
+interface UserProfile {
+  _id: string;
+  name: string;
+  email: string;
+  isBlocked: boolean;
+  isEmailVerified: boolean;
+  roles: [string];
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
 
 interface AuthContextProps {
   isAuthenticated: boolean;
@@ -7,6 +21,7 @@ interface AuthContextProps {
   login: (access: string, refresh: string) => void;
   accessToken: string | null;
   refreshToken: string | null;
+  user: UserProfile | null;
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -22,6 +37,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
     () => !!localStorage.getItem("access_token")
   );
+  const [user, setUser] = useState<UserProfile | null>(null);
 
   const login = (access: string, refresh: string) => {
     setAccessToken(access);
@@ -40,13 +56,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    // Token Validation
+    const fetchProfile = async () => {
+      try {
+        const axiosAdmin = () => createAxiosAdminFn();
+        const { data } = await axiosAdmin().get(URLS.PROFILE);
+        setUser(data.data);
+      } catch (e) {
+        console.error("Profile fetch Error:", e);
+        logout();
+      }
+    };
+    if (accessToken && !user) {
+      fetchProfile();
+    }
+  }, [accessToken, user]);
+
+  useEffect(() => {
     if (!isAuthenticated) navigate("/auth/login");
   }, [navigate, isAuthenticated]);
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated: !!accessToken, logout, login, accessToken, refreshToken }}
+      value={{ isAuthenticated: !!accessToken, logout, login, accessToken, refreshToken, user }}
     >
       {children}
     </AuthContext.Provider>
