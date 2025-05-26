@@ -1,4 +1,11 @@
 import { Routes, Route } from "react-router";
+import { Toaster } from "sonner";
+
+import PrivateRoute from "./components/PrivateRoute";
+import RouteWatcher from "./components/RouteWatcher";
+
+import AdminLayout from "./layout/AdminLayout";
+
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
 import Error from "@/pages/Error";
@@ -10,16 +17,13 @@ import Home from "./pages/Home";
 import UserLayout from "./layout/UserLayout";
 import AddResume from "./pages/admin/resumes/AddResume";
 import User from "./pages/admin/users";
-
-import AdminLayout from "./layout/AdminLayout";
-import { AdminResumes } from "./pages/admin/resumes";
-import { Toaster } from "sonner";
-import PrivateRoute from "./components/PrivateRoute";
+import AdminResumes from "./pages/admin/resumes";
 import UserDetail from "./pages/admin/users/user";
 
 export default function App() {
   return (
     <>
+      <RouteWatcher />
       <Routes>
         {/* Auth Pages */}
         <Route path="/auth">

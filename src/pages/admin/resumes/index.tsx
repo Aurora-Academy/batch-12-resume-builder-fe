@@ -95,7 +95,7 @@ const resumes = [
   },
 ];
 
-export function AdminResumes() {
+export default function AdminResumes() {
   const [isAddResumeOpen, setIsAddResumeOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 

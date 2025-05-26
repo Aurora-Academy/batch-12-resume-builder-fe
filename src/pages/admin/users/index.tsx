@@ -230,11 +230,11 @@ export default function AdminUsers() {
   }, [dispatch, limit, currentPage, debouncedSearchTerm]);
 
   // browser current page & limit update
-
   useEffect(() => {
     if (searchParams.get("limit") || searchParams.get("page")) {
       const limitParam = parseInt(searchParams.get("limit") || "10");
       const pageParam = parseInt(searchParams.get("page") || "1");
+      console.log({ limitParam, pageParam });
       dispatch(setCurrentPage(pageParam));
       dispatch(setLimit(limitParam));
     }
@@ -244,8 +244,6 @@ export default function AdminUsers() {
     const query = new URLSearchParams({ page: currentPage.toString(), limit: limit.toString() });
     navigate(`?${query.toString()}`, { replace: true });
   }, [currentPage, limit, navigate]);
-
-  // update url
 
   useEffect(() => {
     initUserFetch();
