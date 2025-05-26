@@ -1,37 +1,40 @@
-import axios from "axios";
+import axios, { AxiosInstance, AxiosError } from "axios";
 import { API_URL } from "@/constants";
 import { decodeJWT } from "@/lib/jwt";
 import { getItem } from "./storage";
 
-export const createAxiosAdmin = (
-  getAuth: () => {
-    accessToken: string | null;
-    refreshToken: string | null;
-  },
-  logout: () => void
-) => {
-  const axiosAdmin = axios.create({
-    baseURL: API_URL,
-  });
+type AuthProvider = () => {
+  accessToken: string | null;
+  refreshToken: string | null;
+};
 
-  // Request Interceptor
-  axiosAdmin.interceptors.request.use(
-    function (config) {
-      const { accessToken } = getAuth();
+type LogoutFn = () => void;
+
+const attachRequestInterceptor = (instance: AxiosInstance, getAccessToken: () => string | null) => {
+  instance.interceptors.request.use(
+    (config) => {
+      const accessToken = getAccessToken();
       if (accessToken) {
-        config.headers.access_token = `${accessToken}`;
+        config.headers = config.headers || {};
+        (config.headers as any).access_token = `${accessToken}`;
       }
       return config;
     },
     (error) => Promise.reject(error)
   );
+};
 
-  // Response Interceptor
-  axiosAdmin.interceptors.response.use(
+const attachResponseInterceptor = (
+  instance: AxiosInstance,
+  getAuth: AuthProvider,
+  logout?: LogoutFn
+) => {
+  instance.interceptors.response.use(
     (response) => response,
-    async (err) => {
-      const originalRequest = err.config;
+    async (err: AxiosError) => {
+      const originalRequest = err.config as any;
       const { accessToken, refreshToken } = getAuth();
+
       if (refreshToken && err.response?.status === 500 && !originalRequest._retry) {
         originalRequest._retry = true;
         try {
@@ -46,67 +49,40 @@ export const createAxiosAdmin = (
 
           localStorage.setItem("access_token", newAccess);
           localStorage.setItem("refresh_token", newRefresh);
-          originalRequest.headers.access_token = `${accessToken}`;
-          return axiosAdmin(originalRequest);
+
+          originalRequest.headers.access_token = `${newAccess}`;
+          return instance(originalRequest);
         } catch (e) {
           console.log("Token refresh failed", e);
-          // Logout
-          logout();
+          if (logout) logout();
+          return Promise.reject(e);
         }
       }
+
       return Promise.reject(err);
     }
   );
+};
+
+export const createAxiosAdmin = (getAuth: AuthProvider, logout: LogoutFn) => {
+  const axiosAdmin = axios.create({ baseURL: API_URL });
+
+  attachRequestInterceptor(axiosAdmin, () => getAuth().accessToken);
+  attachResponseInterceptor(axiosAdmin, getAuth, logout);
+
   return axiosAdmin;
 };
 
 export const createAxiosAdminFn = () => {
-  const axiosAdmin = axios.create({
-    baseURL: API_URL,
+  const getAuth = (): { accessToken: string | null; refreshToken: string | null } => ({
+    accessToken: getItem(),
+    refreshToken: getItem("refresh_token"),
   });
 
-  // Request Interceptor
-  axiosAdmin.interceptors.request.use(
-    function (config) {
-      const accessToken = getItem();
-      if (accessToken) {
-        config.headers.access_token = `${accessToken}`;
-      }
-      return config;
-    },
-    (error) => Promise.reject(error)
-  );
+  const axiosAdmin = axios.create({ baseURL: API_URL });
 
-  // Response Interceptor
-  axiosAdmin.interceptors.response.use(
-    (response) => response,
-    async (err) => {
-      const originalRequest = err.config;
-      const accessToken = getItem();
-      const refreshToken = getItem("refresh_token");
-      if (refreshToken && err.response?.status === 500 && !originalRequest._retry) {
-        originalRequest._retry = true;
-        try {
-          const { data }: any = decodeJWT(accessToken);
-          const res = await axios.post(`${API_URL}/users/refresh`, {
-            refresh_token: refreshToken,
-            email: data?.email,
-          });
+  attachRequestInterceptor(axiosAdmin, () => getAuth().accessToken);
+  attachResponseInterceptor(axiosAdmin, getAuth);
 
-          const newAccess = res?.data?.access_token;
-          const newRefresh = res?.data?.refresh_token;
-
-          localStorage.setItem("access_token", newAccess);
-          localStorage.setItem("refresh_token", newRefresh);
-          originalRequest.headers.access_token = `${accessToken}`;
-          return axiosAdmin(originalRequest);
-        } catch (e) {
-          console.log("Token refresh failed", e);
-          return Promise.reject(e);
-        }
-      }
-      return Promise.reject(err);
-    }
-  );
   return axiosAdmin;
 };
