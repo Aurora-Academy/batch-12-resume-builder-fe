@@ -52,7 +52,6 @@ export const createAxiosAdmin = (
           console.log("Token refresh failed", e);
           // Logout
           logout();
-          // return Promise.reject(e);
         }
       }
       return Promise.reject(err);

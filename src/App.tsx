@@ -15,6 +15,7 @@ import AdminLayout from "./layout/AdminLayout";
 import { AdminResumes } from "./pages/admin/resumes";
 import { Toaster } from "sonner";
 import PrivateRoute from "./components/PrivateRoute";
+import UserDetail from "./pages/admin/users/user";
 
 export default function App() {
   return (
@@ -60,6 +61,14 @@ export default function App() {
             element={
               <PrivateRoute>
                 <AddResume />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="users/:id"
+            element={
+              <PrivateRoute adminOnly={false}>
+                <UserDetail />
               </PrivateRoute>
             }
           />

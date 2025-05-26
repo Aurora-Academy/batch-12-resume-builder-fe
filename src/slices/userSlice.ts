@@ -63,7 +63,7 @@ export const makeUserDownloadable = createAsyncThunk(
 
 export const blockUser = createAsyncThunk(
   "users/blockUser",
-  async ({ id, status }: { id: string; status: string }, { rejectWithValue }) => {
+  async ({ id }: { id: string; status?: string }, { rejectWithValue }) => {
     try {
       const axiosAdmin = () => createAxiosAdminFn();
       const { data } = await axiosAdmin().patch(`${URLS.USERS}/${id}/block`);
@@ -84,7 +84,6 @@ const userSlice = createSlice({
       state.currentPage = action.payload;
     },
     setLimit: (state, action) => {
-      state.currentPage = 1;
       state.limit = action.payload;
     },
   },
@@ -119,8 +118,12 @@ const userSlice = createSlice({
       })
       .addCase(blockUser.fulfilled, (state, action) => {
         state.loading = false;
-        const existing = state.users.find((user: any) => user?._id === action.meta.arg.id);
-        existing.isBlocked = action.meta.arg.status === "blocked" ? true : false;
+        const existing = state.users.find((user: any) => user?._id === action.meta.arg.id) as
+          | UserProfile
+          | undefined;
+        if (existing) {
+          existing.isBlocked = action.meta.arg.status === "blocked" ? true : false;
+        }
       })
       .addCase(blockUser.rejected, (state, action: any) => {
         state.loading = false;

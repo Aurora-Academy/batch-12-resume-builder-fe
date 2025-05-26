@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router";
+import { Link, useSearchParams, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Eye, Pencil, Trash2, Download, FileWarningIcon } from "lucide-react";
@@ -40,6 +40,8 @@ type User = {
   __v?: number;
 };
 export default function AdminUsers() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const dispatch = useDispatch<AppDispatch>();
   const { users, limit, currentPage, total } = useSelector((state: any) => state.users);
   const [search, setSearch] = useState<string>("");
@@ -54,10 +56,11 @@ export default function AdminUsers() {
   };
 
   const handleEditUser = (user: User) => {
-    toast(`Editing ${user.name}'s profile`, {
-      description: "You can now edit this user's information",
-      icon: <Pencil className="h-4 w-4" />,
-    });
+    // toast(`Editing ${user.name}'s profile`, {
+    //   description: "You can now edit this user's information",
+    //   icon: <Pencil className="h-4 w-4" />,
+    // });
+    navigate(`/admin/users/${user?._id}`);
   };
 
   const handleBlockUser = (user: User) => {
@@ -226,9 +229,29 @@ export default function AdminUsers() {
     dispatch(fetchUsers({ limit, page: currentPage, search: debouncedSearchTerm }));
   }, [dispatch, limit, currentPage, debouncedSearchTerm]);
 
+  // browser current page & limit update
+
+  useEffect(() => {
+    if (searchParams.get("limit") || searchParams.get("page")) {
+      const limitParam = parseInt(searchParams.get("limit") || "10");
+      const pageParam = parseInt(searchParams.get("page") || "1");
+      dispatch(setCurrentPage(pageParam));
+      dispatch(setLimit(limitParam));
+    }
+  }, [dispatch, searchParams]);
+
+  useEffect(() => {
+    const query = new URLSearchParams({ page: currentPage.toString(), limit: limit.toString() });
+    navigate(`?${query.toString()}`, { replace: true });
+  }, [currentPage, limit, navigate]);
+
+  // update url
+
   useEffect(() => {
     initUserFetch();
   }, [initUserFetch]);
+
+  console.log({ searchParams });
 
   return (
     <div className="p-6 space-y-6">
