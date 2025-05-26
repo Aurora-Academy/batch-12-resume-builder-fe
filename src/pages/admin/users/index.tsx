@@ -234,7 +234,6 @@ export default function AdminUsers() {
     if (searchParams.get("limit") || searchParams.get("page")) {
       const limitParam = parseInt(searchParams.get("limit") || "10");
       const pageParam = parseInt(searchParams.get("page") || "1");
-      console.log({ limitParam, pageParam });
       dispatch(setCurrentPage(pageParam));
       dispatch(setLimit(limitParam));
     }
@@ -248,8 +247,6 @@ export default function AdminUsers() {
   useEffect(() => {
     initUserFetch();
   }, [initUserFetch]);
-
-  console.log({ searchParams });
 
   return (
     <div className="p-6 space-y-6">
