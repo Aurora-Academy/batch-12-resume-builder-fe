@@ -46,7 +46,7 @@ export default function AdminUsers() {
   const { users, limit, currentPage, total } = useSelector((state: any) => state.users);
   const [search, setSearch] = useState<string>("");
 
-  const debouncedSearchTerm = useDebounce(search, 1500);
+  const debouncedSearchTerm = useDebounce(search, 700);
 
   const handleViewUser = (user: User) => {
     toast(`Viewing ${user.name}'s profile`, {
@@ -231,18 +231,24 @@ export default function AdminUsers() {
 
   // browser current page & limit update
   useEffect(() => {
-    if (searchParams.get("limit") || searchParams.get("page")) {
+    if (searchParams.get("limit") || searchParams.get("page") || searchParams.get("name")) {
       const limitParam = parseInt(searchParams.get("limit") || "10");
       const pageParam = parseInt(searchParams.get("page") || "1");
+      const nameParam = searchParams.get("name") || "";
+      setSearch(nameParam);
       dispatch(setCurrentPage(pageParam));
       dispatch(setLimit(limitParam));
     }
   }, [dispatch, searchParams]);
 
   useEffect(() => {
-    const query = new URLSearchParams({ page: currentPage.toString(), limit: limit.toString() });
+    const query = new URLSearchParams({
+      page: currentPage.toString(),
+      limit: limit.toString(),
+      name: search ?? debouncedSearchTerm,
+    });
     navigate(`?${query.toString()}`, { replace: true });
-  }, [currentPage, limit, navigate]);
+  }, [currentPage, limit, navigate, debouncedSearchTerm, search]);
 
   useEffect(() => {
     initUserFetch();
