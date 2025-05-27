@@ -27,18 +27,8 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
 
-// type User = (typeof users)[0];
-type User = {
-  _id: string;
-  name: string;
-  email: string;
-  isBlocked: boolean;
-  isEmailVerified: boolean;
-  roles: [string];
-  createdAt: string;
-  updatedAt: string;
-  __v?: number;
-};
+import { User } from "@/types/User";
+
 export default function AdminUsers() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
