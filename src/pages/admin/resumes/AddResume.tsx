@@ -1,4 +1,4 @@
-import ResumeForm from "@/components/resume/resume-form";
+import ResumeBuilder from "@/components/resume/resume-form";
 
 const AddResume = () => {
   return (
@@ -6,7 +6,7 @@ const AddResume = () => {
       <div className="mb-4">
         <h1 className="text-3xl font-bold">Create New Resume</h1>
       </div>
-      <ResumeForm />
+      <ResumeBuilder />
     </div>
   );
 };

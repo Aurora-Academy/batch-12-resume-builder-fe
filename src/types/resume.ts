@@ -44,11 +44,12 @@ export interface Certifications {
 }
 
 export interface ResumeCoreSections {
-  personal: PersonalInfo;
+  personalInfo: PersonalInfo;
   education: Education[];
-  experience: Experience[];
+  experiences: Experience[];
   projects: Projects[];
   skills: Skills[];
+  certifications: Certifications[];
 }
 
 export interface Resume extends ResumeCoreSections {
