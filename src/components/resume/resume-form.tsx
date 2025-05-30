@@ -3,6 +3,7 @@ import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { resumeSchema } from "@/lib/resumeValidation";
 import { useDispatch } from "react-redux";
+import { v4 as uuidv4 } from "uuid";
 
 import type { ResumeCoreSections } from "@/types/resume";
 import { addNewResume } from "@/slices/resumeSlice";
@@ -61,6 +62,7 @@ export default function ResumeBuilder() {
   const {
     handleSubmit,
     trigger,
+    watch,
     getValues,
     formState: { isSubmitting },
   } = methods;
@@ -101,6 +103,29 @@ export default function ResumeBuilder() {
     }
   };
 
+  function getResumeCoreSections(): ResumeCoreSections {
+    return methods.getValues() as ResumeCoreSections;
+  }
+
+  const isFirstTwoStepsValid = () => {
+    watch(["personalInfo", "education"]);
+    const personalInfo = getValues().personalInfo;
+    const education = getValues().education;
+    const isPersonalInfoValid =
+      !!personalInfo.email &&
+      !!personalInfo.fullName &&
+      !!personalInfo.phone &&
+      !!personalInfo.summary &&
+      !!personalInfo.address;
+    const isEducationValid =
+      Array.isArray(education) &&
+      education.length > 0 &&
+      education.every(
+        (e) => !!e.institution && !!e.startDate && !!e.endDate && !!e.degree && !!e.course
+      );
+    return isPersonalInfoValid && isEducationValid;
+  };
+
   const onSubmit = async (data: ResumeCoreSections) => {
     try {
       console.log({ data });
@@ -111,10 +136,18 @@ export default function ResumeBuilder() {
     }
   };
 
-  const onSaveAndExit = async (data: ResumeCoreSections) => {
+  const onSaveAndExit = async () => {
     try {
-      console.log({ data });
-      await dispatch(addNewResume(data));
+      const data = getResumeCoreSections();
+      const resume = {
+        ...data,
+        id: uuidv4(),
+        title: `resume-${uuidv4()}`,
+        status: "draft" as const,
+        isSavedToServer: false,
+        updatedAt: new Date().toISOString(),
+      };
+      dispatch(addNewResume(resume));
       alert("Resume saved successfully");
     } catch (e) {
       console.error("Error saving resume:", e);
@@ -227,7 +260,7 @@ export default function ResumeBuilder() {
                         type="button"
                         variant="default"
                         onClick={handleSubmit(onSaveAndExit)}
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || !isFirstTwoStepsValid()}
                       >
                         {isSubmitting ? (
                           <>

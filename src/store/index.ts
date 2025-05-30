@@ -26,6 +26,7 @@ const persistConfig = {
   key: "resume-persist",
   storage,
   whitelist: ["resumes"],
+  version: 1,
   stateReconciler: autoMergeLevel2,
 };
 
