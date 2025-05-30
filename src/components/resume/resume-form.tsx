@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { resumeSchema } from "@/lib/resumeValidation";
@@ -10,8 +11,10 @@ import { addNewResume } from "@/slices/resumeSlice";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
-import { ChevronLeft, ChevronRight, Save, FileText } from "lucide-react";
+import { ChevronLeft, ChevronRight, Save } from "lucide-react";
 
 import { Stepper } from "@/components/ui/stepper";
 import { PersonalInfoForm } from "@/components/resume/forms/personal-info-form";
@@ -32,7 +35,12 @@ const steps = [
   "Preview",
 ];
 
-const defaultValues: ResumeCoreSections = {
+interface Resume extends ResumeCoreSections {
+  title: string;
+}
+
+const defaultValues: Resume = {
+  title: "",
   personalInfo: {
     fullName: "",
     email: "",
@@ -51,9 +59,10 @@ const defaultValues: ResumeCoreSections = {
 };
 
 export default function ResumeBuilder() {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const [currentStep, setCurrentStep] = useState(0);
-  const methods = useForm<ResumeCoreSections>({
+  const methods = useForm<Resume>({
     resolver: zodResolver(resumeSchema),
     defaultValues,
     mode: "onChange",
@@ -64,6 +73,7 @@ export default function ResumeBuilder() {
     trigger,
     watch,
     getValues,
+    register,
     formState: { isSubmitting },
   } = methods;
 
@@ -103,8 +113,8 @@ export default function ResumeBuilder() {
     }
   };
 
-  function getResumeCoreSections(): ResumeCoreSections {
-    return methods.getValues() as ResumeCoreSections;
+  function getResumeCoreSections(): Resume {
+    return methods.getValues() as Resume;
   }
 
   const isFirstTwoStepsValid = () => {
@@ -126,10 +136,20 @@ export default function ResumeBuilder() {
     return isPersonalInfoValid && isEducationValid;
   };
 
-  const onSubmit = async (data: ResumeCoreSections) => {
+  const onSubmit = async () => {
     try {
-      console.log({ data });
+      const data = getResumeCoreSections();
+      const resume = {
+        ...data,
+        id: uuidv4(),
+        title: `resume-${uuidv4()}`,
+        status: "final" as const,
+        isSavedToServer: true,
+        updatedAt: new Date().toISOString(),
+      };
+      dispatch(addNewResume(resume));
       alert("Resume saved successfully");
+      navigate("/admin/resumes");
     } catch (e) {
       console.error("Error saving resume:", e);
       alert("Error saving resume. Please try again");
@@ -138,17 +158,19 @@ export default function ResumeBuilder() {
 
   const onSaveAndExit = async () => {
     try {
-      const data = getResumeCoreSections();
+      const { title, ...rest } = getResumeCoreSections();
+
       const resume = {
-        ...data,
+        ...rest,
         id: uuidv4(),
-        title: `resume-${uuidv4()}`,
+        title,
         status: "draft" as const,
         isSavedToServer: false,
         updatedAt: new Date().toISOString(),
       };
       dispatch(addNewResume(resume));
-      alert("Resume saved successfully");
+      alert("Draft saved successfully");
+      navigate("/admin/resumes");
     } catch (e) {
       console.error("Error saving resume:", e);
       alert("Error saving resume. Please try again");
@@ -212,8 +234,10 @@ export default function ResumeBuilder() {
           <Card className="mb-8">
             <CardHeader className="text-center">
               <CardTitle className="flex items-center justify-center gap-2 text-3xl">
-                <FileText className="h-8 w-8" />
-                Resume Builder
+                <div className="space-y-2 w-full">
+                  <Label htmlFor="fullName">Resume Title *</Label>
+                  <Input id="title" type="text" {...register("title")} placeholder="CEO" />
+                </div>
               </CardTitle>
               <CardDescription>Create a professional resume step by step</CardDescription>
             </CardHeader>
@@ -269,7 +293,7 @@ export default function ResumeBuilder() {
                         ) : (
                           <>
                             <Save className="h-4 w-4 mr-2" />
-                            Save & Exit
+                            Save as draft
                           </>
                         )}
                       </Button>
