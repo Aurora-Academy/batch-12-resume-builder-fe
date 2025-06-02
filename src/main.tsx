@@ -13,7 +13,14 @@ import "./index.css";
 import App from "./App.tsx";
 import { AuthProvider } from "@/context/AuthContext.tsx";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000, // 1 minute
+      retry: 1,
+    },
+  },
+});
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

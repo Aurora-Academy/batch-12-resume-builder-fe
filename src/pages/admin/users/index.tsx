@@ -27,7 +27,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
 
-import { User } from "@/types/User";
+import { User } from "@/types/user";
 
 export default function AdminUsers() {
   const navigate = useNavigate();
@@ -55,7 +55,13 @@ export default function AdminUsers() {
 
   const handleBlockUser = (user: User) => {
     const status = user?.isBlocked ? "unblocked" : "blocked";
-    dispatch(blockUser({ id: user?._id, status }));
+    if (user?._id) {
+      dispatch(blockUser({ id: user._id, status }));
+    } else {
+      toast.error("User ID is missing. Cannot block user.", {
+        icon: <FileWarningIcon className="h-4 w-4" />,
+      });
+    }
     if (status === "blocked") {
       toast.error(`${user.name} has been ${status}`, {
         description: `User has been ${status}`,

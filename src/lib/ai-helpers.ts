@@ -1,25 +1,15 @@
-// Mock AI service - replace with actual AI API calls
-export async function generateProfessionalSummary(personalInfo: {
-  fullName: string;
-  email: string;
-  phone: string;
-  summary: string;
-  github: string;
-  linkedin: string;
-  address: string;
-  website?: string;
-}): Promise<string> {
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+import { URLS } from "@/constants";
+import { createAxiosAdminFn } from "./axiosAdmin";
 
-  // Mock AI-generated summary based on available info
-  const name = personalInfo.fullName || "Professional";
-  const hasGithub = personalInfo.github ? "with strong technical portfolio" : "";
-  const hasLinkedIn = personalInfo.linkedin ? "and proven networking capabilities" : "";
-
-  return `Experienced ${
-    name.split(" ")[0]
-  } ${hasGithub} ${hasLinkedIn}. Passionate about delivering high-quality solutions and driving innovation. Proven track record of collaborating effectively with cross-functional teams to achieve project goals. Committed to continuous learning and staying current with industry best practices and emerging technologies.`;
+export async function getAIResponse(query: string): Promise<string> {
+  try {
+    const axiosInstance = createAxiosAdminFn();
+    const { data } = await axiosInstance.post(URLS.ASSISTANT, { query });
+    return data.content;
+  } catch (e: any) {
+    console.log({ e });
+    return "";
+  }
 }
 
 export async function generateExperienceDescription(experience: {

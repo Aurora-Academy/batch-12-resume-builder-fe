@@ -18,7 +18,8 @@ import UserLayout from "./layout/UserLayout";
 import AddResume from "./pages/admin/resumes/AddResume";
 import User from "./pages/admin/users";
 import AdminResumes from "./pages/admin/resumes";
-import UserDetail from "./pages/admin/users/user";
+import AddUser from "./pages/admin/users/Add";
+import EditUser from "./pages/admin/users/Edit";
 
 export default function App() {
   return (
@@ -72,7 +73,7 @@ export default function App() {
             path="users/:id"
             element={
               <PrivateRoute adminOnly={false}>
-                <UserDetail />
+                <EditUser />
               </PrivateRoute>
             }
           />
@@ -81,6 +82,14 @@ export default function App() {
             element={
               <PrivateRoute adminOnly>
                 <User />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="users/add"
+            element={
+              <PrivateRoute adminOnly={false}>
+                <AddUser />
               </PrivateRoute>
             }
           />

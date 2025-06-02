@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { useFormContext } from "react-hook-form"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Sparkle } from "@/components/ui/sparkle"
-import { generateProfessionalSummary } from "@/lib/ai-helpers"
-import { toast } from "@/hooks/use-toast"
+import { useFormContext } from "react-hook-form";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Sparkle } from "@/components/ui/sparkle";
+import { getAIResponse } from "@/lib/ai-helpers";
+import { toast } from "@/hooks/use-toast";
 
 export function PersonalInfoForm() {
   const {
@@ -15,25 +15,28 @@ export function PersonalInfoForm() {
     formState: { errors },
     setValue,
     getValues,
-  } = useFormContext()
+  } = useFormContext();
 
   const handleGenerateSummary = async () => {
     try {
-      const personalInfo = getValues("personalInfo")
-      const generatedSummary = await generateProfessionalSummary(personalInfo)
-      setValue("personalInfo.summary", generatedSummary)
+      const summary = await getValues("personalInfo.summary");
+      const title = await getValues("title");
+      const info = summary ? summary : title;
+      const payload = `We are working on summary section. Create/rewrite the summary section if provided. The details are provided now; ${info}`;
+      const generatedSummary = await getAIResponse(payload);
+      setValue("personalInfo.summary", generatedSummary, { shouldValidate: true });
       toast({
         title: "Summary Generated!",
         description: "AI has generated a professional summary for you.",
-      })
+      });
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to generate summary. Please try again.",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   return (
     <Card>
@@ -49,14 +52,23 @@ export function PersonalInfoForm() {
             <Label htmlFor="fullName">Full Name *</Label>
             <Input id="fullName" {...register("personalInfo.fullName")} placeholder="John Doe" />
             {errors.personalInfo?.fullName && (
-              <p className="text-sm text-destructive">{errors.personalInfo.fullName.message as string}</p>
+              <p className="text-sm text-destructive">
+                {errors.personalInfo.fullName.message as string}
+              </p>
             )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="email">Email *</Label>
-            <Input id="email" type="email" {...register("personalInfo.email")} placeholder="john@example.com" />
+            <Input
+              id="email"
+              type="email"
+              {...register("personalInfo.email")}
+              placeholder="john@example.com"
+            />
             {errors.personalInfo?.email && (
-              <p className="text-sm text-destructive">{errors.personalInfo.email.message as string}</p>
+              <p className="text-sm text-destructive">
+                {errors.personalInfo.email.message as string}
+              </p>
             )}
           </div>
         </div>
@@ -66,14 +78,22 @@ export function PersonalInfoForm() {
             <Label htmlFor="phone">Phone *</Label>
             <Input id="phone" {...register("personalInfo.phone")} placeholder="+1 (555) 123-4567" />
             {errors.personalInfo?.phone && (
-              <p className="text-sm text-destructive">{errors.personalInfo.phone.message as string}</p>
+              <p className="text-sm text-destructive">
+                {errors.personalInfo.phone.message as string}
+              </p>
             )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="address">Address *</Label>
-            <Input id="address" {...register("personalInfo.address")} placeholder="123 Main St, City, State 12345" />
+            <Input
+              id="address"
+              {...register("personalInfo.address")}
+              placeholder="123 Main St, City, State 12345"
+            />
             {errors.personalInfo?.address && (
-              <p className="text-sm text-destructive">{errors.personalInfo.address.message as string}</p>
+              <p className="text-sm text-destructive">
+                {errors.personalInfo.address.message as string}
+              </p>
             )}
           </div>
         </div>
@@ -81,7 +101,10 @@ export function PersonalInfoForm() {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="summary">Professional Summary *</Label>
-            <Sparkle onClick={handleGenerateSummary} tooltip="Generate professional summary with AI" />
+            <Sparkle
+              onClick={handleGenerateSummary}
+              tooltip="Generate professional summary with AI"
+            />
           </div>
           <Textarea
             id="summary"
@@ -90,35 +113,55 @@ export function PersonalInfoForm() {
             className="min-h-[100px]"
           />
           {errors.personalInfo?.summary && (
-            <p className="text-sm text-destructive">{errors.personalInfo.summary.message as string}</p>
+            <p className="text-sm text-destructive">
+              {errors.personalInfo.summary.message as string}
+            </p>
           )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="github">GitHub URL</Label>
-            <Input id="github" {...register("personalInfo.github")} placeholder="https://github.com/johndoe" />
+            <Input
+              id="github"
+              {...register("personalInfo.github")}
+              placeholder="https://github.com/johndoe"
+            />
             {errors.personalInfo?.github && (
-              <p className="text-sm text-destructive">{errors.personalInfo.github.message as string}</p>
+              <p className="text-sm text-destructive">
+                {errors.personalInfo.github.message as string}
+              </p>
             )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="linkedin">LinkedIn URL</Label>
-            <Input id="linkedin" {...register("personalInfo.linkedin")} placeholder="https://linkedin.com/in/johndoe" />
+            <Input
+              id="linkedin"
+              {...register("personalInfo.linkedin")}
+              placeholder="https://linkedin.com/in/johndoe"
+            />
             {errors.personalInfo?.linkedin && (
-              <p className="text-sm text-destructive">{errors.personalInfo.linkedin.message as string}</p>
+              <p className="text-sm text-destructive">
+                {errors.personalInfo.linkedin.message as string}
+              </p>
             )}
           </div>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="website">Website</Label>
-          <Input id="website" {...register("personalInfo.website")} placeholder="https://johndoe.com" />
+          <Input
+            id="website"
+            {...register("personalInfo.website")}
+            placeholder="https://johndoe.com"
+          />
           {errors.personalInfo?.website && (
-            <p className="text-sm text-destructive">{errors.personalInfo.website.message as string}</p>
+            <p className="text-sm text-destructive">
+              {errors.personalInfo.website.message as string}
+            </p>
           )}
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
