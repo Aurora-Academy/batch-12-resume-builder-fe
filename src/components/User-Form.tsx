@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { X, Plus, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-import { useCreateUser, useUpdateUser } from "@/hooks/use-user-mutations";
+import { useCreateUser, useUpdateUser } from "@/hooks/useUserQuery";
 import type { Role, User, UserFormProps } from "@/types/user";
 
 export default function UserForm({ mode, user, onSuccess, onCancel }: UserFormProps) {
@@ -64,10 +64,6 @@ export default function UserForm({ mode, user, onSuccess, onCancel }: UserFormPr
     try {
       if (mode === "create") {
         await createUserMutation.mutateAsync(formData);
-        toast({
-          title: "Success",
-          description: "User created successfully!",
-        });
         // Reset form after successful creation
         setFormData({
           name: "",
@@ -78,13 +74,7 @@ export default function UserForm({ mode, user, onSuccess, onCancel }: UserFormPr
         });
       } else {
         await updateUserMutation.mutateAsync(formData);
-        toast({
-          title: "Success",
-          description: "User updated successfully!",
-        });
       }
-
-      onSuccess?.();
     } catch (error) {
       toast({
         title: "Error",

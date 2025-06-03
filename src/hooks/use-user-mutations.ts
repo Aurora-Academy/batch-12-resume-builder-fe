@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { User } from "@/types/user";
-import { updateUser } from "@/services/user";
+import { updateUserByID } from "@/services/user";
 
 // Mock API functions - replace with your actual API calls
 const createUser = async (
@@ -23,7 +23,7 @@ const updateUserById = async (userData: User): Promise<User> => {
     ...rest,
   };
   if (!_id) throw new Error("Id is required");
-  const user = await updateUser(_id, updatedUser);
+  const user = await updateUserByID(_id, updatedUser);
   return user;
 };
 

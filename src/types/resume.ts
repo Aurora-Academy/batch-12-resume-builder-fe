@@ -52,10 +52,13 @@ export interface ResumeCoreSections {
   certifications: Certifications[];
 }
 
+export type ResumeTemplate = "modern" | "classic" | "minimal";
+
 export interface Resume extends ResumeCoreSections {
-  id: string;
+  id?: string;
   title: string;
   status: "draft" | "final";
   updatedAt: string;
+  template: ResumeTemplate;
   isSavedToServer: boolean;
 }

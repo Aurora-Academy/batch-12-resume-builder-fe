@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import { useState } from "react";
+import { useSelector } from "react-redux";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -96,6 +97,9 @@ const resumes = [
 ];
 
 export default function AdminResumes() {
+  const { resumes: persistResume } = useSelector((state) => state.resumes);
+
+  console.log({ persistResume });
   const [isAddResumeOpen, setIsAddResumeOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 

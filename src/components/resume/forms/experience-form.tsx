@@ -1,24 +1,24 @@
-"use client"
+"use client";
 
-import { useFieldArray, useFormContext } from "react-hook-form"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Plus, Trash2 } from "lucide-react"
-import { Sparkle } from "@/components/ui/sparkle"
-import { generateExperienceDescription } from "@/lib/ai-helpers"
-import { toast } from "@/hooks/use-toast"
+import { useFieldArray, useFormContext } from "react-hook-form";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Plus, Trash2 } from "lucide-react";
+import { Sparkle } from "@/components/ui/sparkle";
+import { generateExperienceDescription } from "@/lib/ai-helpers";
+import { toast } from "@/hooks/use-toast";
 
 // Helper function to get current month in YYYY-MM format
 const getCurrentMonth = () => {
-  const now = new Date()
-  const year = now.getFullYear()
-  const month = String(now.getMonth() + 1).padStart(2, "0")
-  return `${year}-${month}`
-}
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  return `${year}-${month}`;
+};
 
 export function ExperienceForm() {
   const {
@@ -28,11 +28,11 @@ export function ExperienceForm() {
     setValue,
     getValues,
     formState: { errors },
-  } = useFormContext()
+  } = useFormContext();
   const { fields, append, remove } = useFieldArray({
     control,
     name: "experiences",
-  })
+  });
 
   const addExperience = () => {
     append({
@@ -43,12 +43,12 @@ export function ExperienceForm() {
       endDate: "",
       current: false,
       description: "",
-    })
-  }
+    });
+  };
 
   const handleGenerateDescription = async (index: number) => {
     try {
-      const experience = getValues(`experiences.${index}`)
+      const experience = getValues(`experiences.${index}`);
 
       // Check if required fields are filled
       if (!experience.company || !experience.position) {
@@ -56,31 +56,34 @@ export function ExperienceForm() {
           title: "Missing Information",
           description: "Please fill in company and position before generating description.",
           variant: "destructive",
-        })
-        return
+        });
+        return;
       }
 
-      const generatedDescription = await generateExperienceDescription(experience)
-      setValue(`experiences.${index}.description`, generatedDescription)
+      const generatedDescription = await generateExperienceDescription(experience);
+      setValue(`experiences.${index}.description`, generatedDescription);
       toast({
         title: "Description Generated!",
         description: "AI has generated a job description for you.",
-      })
+      });
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to generate description. Please try again.",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
+
+  console.log(getValues());
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Work Experience</CardTitle>
         <CardDescription>
-          Add your work experience, including internships, part-time jobs, and volunteer work. This section is optional.
+          Add your work experience, including internships, part-time jobs, and volunteer work. This
+          section is optional.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -91,7 +94,8 @@ export function ExperienceForm() {
           </div>
         ) : (
           fields.map((field, index) => {
-            const isCurrent = watch(`experiences.${index}.current`)
+            watch();
+            const isCurrent = watch(`experiences.${index}.current`);
 
             return (
               <div key={field.id} className="space-y-4 p-4 border rounded-lg">
@@ -105,16 +109,22 @@ export function ExperienceForm() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor={`experiences.${index}.company`}>Company *</Label>
-                    <Input {...register(`experiences.${index}.company`)} placeholder="Example Corp" />
-                    {errors.experiences?.[index]?.company && (
+                    <Input
+                      {...register(`experiences.${index}.company`)}
+                      placeholder="Example Corp"
+                    />
+                    {(errors.experiences as any)?.[index]?.company && (
                       <p className="text-sm text-destructive">
-                        {errors.experiences[index]?.company?.message as string}
+                        {(errors.experiences as any)?.[index]?.company?.message as string}
                       </p>
                     )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor={`experiences.${index}.position`}>Position *</Label>
-                    <Input {...register(`experiences.${index}.position`)} placeholder="Software Engineer" />
+                    <Input
+                      {...register(`experiences.${index}.position`)}
+                      placeholder="Software Engineer"
+                    />
                     {errors.experiences?.[index]?.position && (
                       <p className="text-sm text-destructive">
                         {errors.experiences[index]?.position?.message as string}
@@ -125,16 +135,25 @@ export function ExperienceForm() {
 
                 <div className="space-y-2">
                   <Label htmlFor={`experiences.${index}.location`}>Location *</Label>
-                  <Input {...register(`experiences.${index}.location`)} placeholder="San Francisco, CA" />
+                  <Input
+                    {...register(`experiences.${index}.location`)}
+                    placeholder="San Francisco, CA"
+                  />
                   {errors.experiences?.[index]?.location && (
-                    <p className="text-sm text-destructive">{errors.experiences[index]?.location?.message as string}</p>
+                    <p className="text-sm text-destructive">
+                      {errors.experiences[index]?.location?.message as string}
+                    </p>
                   )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor={`experiences.${index}.startDate`}>Start Date *</Label>
-                    <Input type="month" {...register(`experiences.${index}.startDate`)} max={getCurrentMonth()} />
+                    <Input
+                      type="month"
+                      {...register(`experiences.${index}.startDate`)}
+                      max={getCurrentMonth()}
+                    />
                     {errors.experiences?.[index]?.startDate && (
                       <p className="text-sm text-destructive">
                         {errors.experiences[index]?.startDate?.message as string}
@@ -162,9 +181,9 @@ export function ExperienceForm() {
                     id={`experiences.${index}.current`}
                     checked={isCurrent}
                     onCheckedChange={(checked) => {
-                      setValue(`experiences.${index}.current`, checked)
+                      setValue(`experiences.${index}.current`, checked);
                       if (checked) {
-                        setValue(`experiences.${index}.endDate`, "")
+                        setValue(`experiences.${index}.endDate`, "");
                       }
                     }}
                   />
@@ -191,7 +210,7 @@ export function ExperienceForm() {
                   )}
                 </div>
               </div>
-            )
+            );
           })
         )}
 
@@ -201,5 +220,5 @@ export function ExperienceForm() {
         </Button>
       </CardContent>
     </Card>
-  )
+  );
 }

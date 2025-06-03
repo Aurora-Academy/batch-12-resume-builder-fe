@@ -4,10 +4,11 @@ import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { resumeSchema } from "@/lib/resumeValidation";
 import { useDispatch } from "react-redux";
+import type { AppDispatch } from "@/store";
 import { v4 as uuidv4 } from "uuid";
 
 import type { ResumeCoreSections } from "@/types/resume";
-import { addNewResume } from "@/slices/resumeSlice";
+import { addNewResume, saveResumeToServer } from "@/slices/resumeSlice";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,6 +25,7 @@ import { SkillsForm } from "@/components/resume/forms/skills-form";
 import { ProjectsForm } from "@/components/resume/forms//projects-form";
 import { CertificationsForm } from "@/components/resume/forms/certifications-form";
 import { ResumePreview } from "@/components/resume/forms/resume-preview";
+import type { ResumeTemplate } from "@/types/resume";
 
 const steps = [
   "Personal Info",
@@ -37,6 +39,7 @@ const steps = [
 
 interface Resume extends ResumeCoreSections {
   title: string;
+  template: ResumeTemplate;
 }
 
 const defaultValues: Resume = {
@@ -56,11 +59,12 @@ const defaultValues: Resume = {
   skills: [],
   projects: [],
   certifications: [],
+  template: "modern",
 };
 
 export default function ResumeBuilder() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const [currentStep, setCurrentStep] = useState(0);
   const methods = useForm<Resume>({
     resolver: zodResolver(resumeSchema),
@@ -141,13 +145,11 @@ export default function ResumeBuilder() {
       const data = getResumeCoreSections();
       const resume = {
         ...data,
-        id: uuidv4(),
-        title: `resume-${uuidv4()}`,
         status: "final" as const,
         isSavedToServer: true,
         updatedAt: new Date().toISOString(),
       };
-      dispatch(addNewResume(resume));
+      dispatch(saveResumeToServer(resume));
       alert("Resume saved successfully");
       navigate("/admin/resumes");
     } catch (e) {
