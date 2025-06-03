@@ -11,8 +11,8 @@ export const fetchUser = (id: string) => {
   return axiosInstance.get(`${URLS.USERS}/${id}`);
 };
 
-export const updateUser = async (id: string, payload: Partial<User>): Promise<User> => {
+export const updateUser = async (_id: string, payload: Partial<User>): Promise<User> => {
   const axiosInstance = createAxiosAdminFn();
-  const response: AxiosResponse<User> = await axiosInstance.put(`${URLS.USERS}/${id}`, payload);
+  const response: AxiosResponse<User> = await axiosInstance.put(`${URLS.USERS}/${_id}`, payload);
   return response.data;
 };

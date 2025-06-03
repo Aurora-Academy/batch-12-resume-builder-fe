@@ -46,7 +46,7 @@ export const useUpdateUser = () => {
     mutationFn: updateUserById,
     onSuccess: (updatedUser) => {
       // Update the specific user in cache
-      queryClient.setQueryData(["users", updatedUser.id], updatedUser);
+      queryClient.setQueryData(["users", updatedUser._id], updatedUser);
       // Invalidate users list to ensure consistency
       queryClient.invalidateQueries({ queryKey: ["users"] });
     },
